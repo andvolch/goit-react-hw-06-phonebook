@@ -1,13 +1,18 @@
 import { useState } from 'react';
 
-import PropTypes from 'prop-types';
-import shortid from 'shortid';
+// import PropTypes from 'prop-types';
+// import shortid from 'shortid';
+import { useDispatch, useSelector } from 'react-redux';
+import { getContacts } from '../../redux/Phonebook/phonebook-selectors';
+import actions from '../../redux/Phonebook/phonebook-actions';
 
 import s from './ContactForm.module.css';
 
-function ContactForm({ submit }) {
+function ContactForm() {
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
+  const contacts = useSelector(getContacts);
+  const dispatch = useDispatch();
 
   const handleChange = e => {
     const { name, value } = e.target;
@@ -25,12 +30,14 @@ function ContactForm({ submit }) {
 
   const handleSubmint = e => {
     e.preventDefault();
-    const newContact = {
-      id: shortid(),
-      name,
-      number,
-    };
-    submit(newContact);
+    const comparableElement = contacts.some(
+      element => element.name.toLowerCase() === name.toLowerCase(),
+    );
+    if (comparableElement) {
+      resetForm();
+      return alert(`${name} is already in the directory`);
+    }
+    dispatch(actions.addContact({ name, number }));
     resetForm();
   };
 
@@ -39,7 +46,7 @@ function ContactForm({ submit }) {
     setNumber('');
   };
 
-  // const { name, number } = this.state;
+
   return (
     <div className={s.container}>
       <form onSubmit={handleSubmint} className={s.form}>
@@ -75,8 +82,8 @@ function ContactForm({ submit }) {
   );
 }
 
-ContactForm.propTypes = {
-  submit: PropTypes.func.isRequired,
-};
+// ContactForm.propTypes = {
+//   submit: PropTypes.func.isRequired,
+// };
 
 export default ContactForm;
